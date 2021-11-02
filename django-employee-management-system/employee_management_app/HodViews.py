@@ -11,6 +11,7 @@ from PIL import Image, ImageDraw
 import numpy as np
 import cv2
 import os
+import xlwt
 from datetime import datetime
 from django.core.paginator import Paginator
 
@@ -471,7 +472,6 @@ def manage_attendance(request):
             return render(request, "hod_template/manage_attendance_template.html", context)
     else:
         data = Attendance.objects.all()
-
         paginator = Paginator(data, per_page=8)
         page_number = request.GET.get('page', 1)
         page_obj = paginator.get_page(page_number)
@@ -508,3 +508,34 @@ def admin_view_attendance(request):
         }
 
         return render(request, 'hod_template/manage_attendance_template.html', context)
+
+
+def export_excel(request):
+    response = HttpResponse(content_type='application/ms-excel')
+    response['Content-Disposition'] = 'attachment; filename=Diemdanh' + \
+        str(datetime.now().date())+'.xls'
+
+    wb = xlwt.Workbook(encoding='utf-8')
+    ws = wb.add_sheet('Diemdanh')
+    row_num = 0
+    font_style = xlwt.XFStyle()
+    font_style.font.bold = True
+
+    colums = ['ID', 'HO TEN', 'NGAY', 'THOI GIAN']
+
+    for col_num in range(len(colums)):
+        ws.write(row_num, col_num, colums[col_num], font_style)
+
+    font_style = xlwt.XFStyle()
+
+    rows = Attendance.objects.all().values_list(
+        'employee_id', 'name', 'attendance_date', 'attendance_time')
+
+    for row in rows:
+        row_num += 1
+
+        for col_num in range(len(row)):
+            ws.write(row_num, col_num, str(row[col_num]), font_style)
+    wb.save(response)
+
+    return response

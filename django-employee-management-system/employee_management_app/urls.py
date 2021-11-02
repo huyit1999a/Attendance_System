@@ -76,4 +76,5 @@ urlpatterns = [
          name="manage_attendance"),
     path("admin_view_attendance/", HodViews.admin_view_attendance,
          name="admin_view_attendance"),
+    path("export_excel/", HodViews.export_excel, name="export_excel"),
 ]
