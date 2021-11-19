@@ -383,6 +383,7 @@ def detect_with_webcam(request):
                 known_face_encodings, encodeFace
             )
             best_match_index = np.argmin(face_distances)
+            exist = False
             if matches[best_match_index]:
                 name = (
                     known_face_names[best_match_index]
@@ -395,7 +396,6 @@ def detect_with_webcam(request):
                 today = datetime.now()
                 day = today.date()
                 time = today.strftime("%H:%M:%S")
-                exist = False
 
                 try:
                     attendance_exist = Attendance.objects.get(
@@ -471,7 +471,7 @@ def manage_attendance(request):
 
             return render(request, "hod_template/manage_attendance_template.html", context)
     else:
-        data = Attendance.objects.all()
+        data = Attendance.objects.all().order_by('-attendance_date')
         paginator = Paginator(data, per_page=8)
         page_number = request.GET.get('page', 1)
         page_obj = paginator.get_page(page_number)
